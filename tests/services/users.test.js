@@ -1,15 +1,10 @@
+const prisma = require('../../client');
 const { createUser } = require('../../src/services/users');
 
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn(() => ({
-    user: {
-      create: jest.fn(() => ({
-        id: 1,
-        name: 'Jane Doe',
-        email: 'jane@gmail.com',
-      })),
-    },
-  })),
+jest.mock('../../client', () => ({
+  user: {
+    create: jest.fn(),
+  },
 }));
 
 describe('createUser', () => {
@@ -19,6 +14,16 @@ describe('createUser', () => {
       name: 'Jane Doe',
       email: 'jane@gmail.com',
     };
-    await expect(createUser(user.email, user.name)).resolves.toEqual(user);
+    prisma.user.create.mockResolvedValueOnce(user);
+    expect(prisma.user.create).not.toHaveBeenCalled();
+    const result = await createUser('jane@gmail.com', 'Jane Doe');
+    expect(result).toEqual(user);
+    expect(prisma.user.create).toHaveBeenCalledTimes(1);
+    expect(prisma.user.create).toHaveBeenCalledWith({
+      data: {
+        email: 'jane@gmail.com',
+        name: 'Jane Doe',
+      },
+    });
   });
 });

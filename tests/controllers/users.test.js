@@ -41,7 +41,11 @@ describe('createUser', () => {
     const mockError = new Error('ERROR!');
     userServices.createUser.mockRejectedValueOnce(mockError);
     expect(mockNext).not.toHaveBeenCalled();
-    await createUser({ body: user.email, email: user.name }, { json: mockJson }, mockNext);
+    await createUser(
+      { body: { email: user.email, name: user.name } },
+      { json: mockJson },
+      mockNext,
+    );
     expect(mockNext).toHaveBeenCalledTimes(1);
     expect(mockNext).toHaveBeenCalledWith(mockError);
   });
