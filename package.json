@@ -1,5 +1,5 @@
 {
-  "name": "dummy-api",
+  "name": "demo-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,8 +8,8 @@
     "start:prod": "node ./src/app.js",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev",
-    "test": "jest",
-    "coverage": "jest --coverage"
+    "test": "jest --verbose",
+    "coverage": "jest --coverage && open coverage/lcov-report/index.html"
   },
   "author": "",
   "license": "ISC",

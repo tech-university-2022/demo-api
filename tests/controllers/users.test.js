@@ -1,49 +1,65 @@
-const { createUser } = require('../../src/controllers/users');
-const userServices = require('../../src/services/users');
+const { createUser } = require('../../src/services/users');
+const userController = require('../../src/controllers/users');
 
 jest.mock('../../src/services/users', () => ({
   createUser: jest.fn(),
 }));
 
-describe('createUser', () => {
+describe('create user controller', () => {
   const mockJson = jest.fn();
   const mockNext = jest.fn();
   beforeEach(() => {
-    userServices.createUser.mockClear();
+    createUser.mockClear();
     mockJson.mockClear();
     mockNext.mockClear();
   });
-  it('should create new user and send it in the response', async () => {
-    const user = {
-      id: 1,
+
+  it('should create user and send it in the response when user is created successfully', async () => {
+    createUser.mockResolvedValue({
+      email: 'jane_doe@gmail.com',
       name: 'Jane Doe',
-      email: 'jane@gmail.com',
-    };
-    userServices.createUser.mockResolvedValueOnce(user);
+      id: 1,
+    });
+
     expect(mockJson).not.toHaveBeenCalled();
-    expect(userServices.createUser).not.toHaveBeenCalled();
-    await createUser(
-      { body: { email: user.email, name: user.name } },
-      { json: mockJson },
+    await userController.createUser(
+      {
+        body: {
+          email: 'jane_doe@gmail.com',
+          name: 'Jane Doe',
+        },
+      },
+      {
+        json: mockJson,
+      },
       mockNext,
     );
+    expect(createUser).toHaveBeenCalledTimes(1);
+    expect(createUser).toHaveBeenCalledWith('jane_doe@gmail.com', 'Jane Doe');
+
     expect(mockJson).toHaveBeenCalledTimes(1);
-    expect(mockJson).toHaveBeenCalledWith(user);
-    expect(userServices.createUser).toHaveBeenCalledTimes(1);
-    expect(userServices.createUser).toHaveBeenCalledWith(user.email, user.name);
-  });
-  it('should return error when there is error in creating user', async () => {
-    const user = {
-      id: 1,
+    expect(mockJson).toHaveBeenCalledWith({
+      email: 'jane_doe@gmail.com',
       name: 'Jane Doe',
-      email: 'jane@gmail.com',
-    };
+      id: 1,
+    });
+  });
+
+  it('should send error in next function when there is error in creating user', async () => {
     const mockError = new Error('ERROR!');
-    userServices.createUser.mockRejectedValueOnce(mockError);
+    createUser.mockRejectedValue(mockError);
+
     expect(mockNext).not.toHaveBeenCalled();
-    await createUser(
-      { body: { email: user.email, name: user.name } },
-      { json: mockJson },
+    await userController.createUser(
+      {
+        body: {
+          email: 'jane_doe@gmail.com',
+          name: 'Jane Doe',
+        },
+      },
+      {
+        json: mockJson,
+      },
       mockNext,
     );
     expect(mockNext).toHaveBeenCalledTimes(1);

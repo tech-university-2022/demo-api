@@ -8,22 +8,25 @@ jest.mock('../../client', () => ({
 }));
 
 describe('createUser', () => {
-  it('should create new user', async () => {
-    const user = {
-      id: 1,
+  it('should create user in database and return created user when data is correct', async () => {
+    prisma.user.create.mockResolvedValue({
+      email: 'jane_doe@gmail.com',
       name: 'Jane Doe',
-      email: 'jane@gmail.com',
-    };
-    prisma.user.create.mockResolvedValueOnce(user);
-    expect(prisma.user.create).not.toHaveBeenCalled();
-    const result = await createUser('jane@gmail.com', 'Jane Doe');
-    expect(result).toEqual(user);
+      id: 1,
+    });
+    expect(prisma.user.create).toHaveBeenCalledTimes(0);
+    const result = await createUser('jane_doe@gmail.com', 'Jane Doe');
     expect(prisma.user.create).toHaveBeenCalledTimes(1);
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
-        email: 'jane@gmail.com',
+        email: 'jane_doe@gmail.com',
         name: 'Jane Doe',
       },
+    });
+    expect(result).toEqual({
+      email: 'jane_doe@gmail.com',
+      name: 'Jane Doe',
+      id: 1,
     });
   });
 });
